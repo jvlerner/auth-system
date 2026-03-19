@@ -1,0 +1,34 @@
+# Build files
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Go workspace
+*.test
+*.prof
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Configs / Secrets
+.env*
+!.env*.example
+configs/rsa/*
+!configs/rsa/README.md
+configs/certs/*
+!configs/certs/README.md
+/certs/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Docker / Vendor
+vendor/
+data/
