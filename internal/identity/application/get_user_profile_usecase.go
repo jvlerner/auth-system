@@ -7,11 +7,6 @@ import (
 	"go.uber.org/zap"
 )
 
-type ReadRepository interface {
-	FindByID(ctx context.Context, id string) (*domain.User, error)
-	SyncUser(ctx context.Context, user *domain.User) error
-}
-
 type GetUserProfileQuery struct {
 	ID string `json:"id"`
 	// Outros filtros poderiam entrar aqui
@@ -32,18 +27,19 @@ type ProfileCache interface {
 type GetUserProfileUseCase struct {
 	// Importante: No CQRS, as queries podem ler direto da Infra/View.
 	// Não precisamos necessariamente carregar um Aggregate Root pesadíssimo do Domínio.
-	readRepo ReadRepository
+	readRepo domain.UserReadRepository
 	cache    ProfileCache
 	logger   *zap.Logger
 }
 
-func NewGetUserProfileUseCase(readRepo ReadRepository, cache ProfileCache, logger *zap.Logger) *GetUserProfileUseCase {
+func NewGetUserProfileUseCase(readRepo domain.UserReadRepository, cache ProfileCache, logger *zap.Logger) *GetUserProfileUseCase {
 	return &GetUserProfileUseCase{
 		readRepo: readRepo,
 		cache:    cache,
 		logger:   logger,
 	}
 }
+
 
 func (uc *GetUserProfileUseCase) Execute(ctx context.Context, query GetUserProfileQuery) (*UserProfileDTO, error) {
 	// 0. Tenta buscar do Cache primeiro

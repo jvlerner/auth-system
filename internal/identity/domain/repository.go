@@ -4,13 +4,18 @@ import (
 	"context"
 )
 
-// UserRepository é o "Port" da camada de Domínio.
-// Define como a aplicação interage com o armazenamento do User.
-// A implementação real (Adapter) ficará em infrastructure.
+// UserRepository define operações de escrita e validação (Command Side).
 type UserRepository interface {
 	Save(ctx context.Context, user *User) error
-	FindByEmail(ctx context.Context, email Email) (*User, error)
-	FindByID(ctx context.Context, id string) (*User, error)
 	Update(ctx context.Context, user *User) error
 	UpdateRoles(ctx context.Context, id string, roles []string) error
+	FindByID(ctx context.Context, id string) (*User, error)
+	FindByEmail(ctx context.Context, email Email) (*User, error)
 }
+
+// UserReadRepository define operações de consulta para visualização (Query Side).
+type UserReadRepository interface {
+	FindByID(ctx context.Context, id string) (*User, error)
+	FindByEmail(ctx context.Context, email Email) (*User, error)
+}
+

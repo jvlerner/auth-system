@@ -14,14 +14,13 @@ type PostgresReadRepository struct {
 	pool *pgxpool.Pool
 }
 
-func NewPostgresReadRepository(pool *pgxpool.Pool) *PostgresReadRepository {
+func NewPostgresReadRepository(pool *pgxpool.Pool) domain.UserReadRepository {
 	return &PostgresReadRepository{
 		pool: pool,
 	}
 }
 
-// SyncUser é chamado pelo RabbitMQ Consumer.
-// Quando o evento "UserRegistered" chega, este método salva a cópia no read_db
+// FindByID busca um perfil simplificado para leitura.
 func (r *PostgresReadRepository) FindByID(ctx context.Context, id string) (*domain.User, error) {
 	query := `
 		SELECT id, email, email_verified, mfa_enabled, totp_secret, created_at, updated_at 
@@ -40,5 +39,29 @@ func (r *PostgresReadRepository) FindByID(ctx context.Context, id string) (*doma
 		return nil, domain.ErrUserNotFound 
 	}
 
+	// Restauramos com hash fake pois o Read View não armazena hashes por segurança/performance
 	return domain.RestoreUser(dbID, mail, "fakehash", emailVerified, mfaEnabled, totpSecret, createdAt, updatedAt)
 }
+
+// FindByEmail busca um perfil simplificado por email.
+func (r *PostgresReadRepository) FindByEmail(ctx context.Context, email domain.Email) (*domain.User, error) {
+	query := `
+		SELECT id, email, email_verified, mfa_enabled, totp_secret, created_at, updated_at 
+		FROM users 
+		WHERE email = $1
+	`
+	var (
+		dbID, mail, totpSecret string
+		emailVerified, mfaEnabled bool
+		createdAt     time.Time
+		updatedAt     time.Time
+	)
+
+	err := r.pool.QueryRow(ctx, query, email.Value()).Scan(&dbID, &mail, &emailVerified, &mfaEnabled, &totpSecret, &createdAt, &updatedAt)
+	if err != nil {
+		return nil, domain.ErrUserNotFound 
+	}
+
+	return domain.RestoreUser(dbID, mail, "fakehash", emailVerified, mfaEnabled, totpSecret, createdAt, updatedAt)
+}
+

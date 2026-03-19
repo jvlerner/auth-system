@@ -8,6 +8,10 @@ A ordem é cronológica inversa (mais recentes no topo). As entradas devem segui
 
 ## Log de Atividades
 
+- [2026-03-19] - [Documentação] - Auditoria arquitetural completa (CQRS): Validação dos fluxos de todos os 10 Use Cases, mapeamento de gaps de Read Replica e Idempotência. `README.md` reescrito com documentação completa dos serviços (`grpc-password`, `grpc-token`, Nginx, `pkg/auth`, `pkg/middleware`, `pkg/queue`, `pkg/health`, `pkg/telemetry`). Gaps adicionados ao `BACKLOG.md`.
+- [2026-03-19] - [Refactoring] - Refatoração da camada de repositórios (CQRS): Segregação das interfaces do domínio em `UserRepository` (Write/Master) e `UserReadRepository` (Read/Replica).
+- [2026-03-19] - [Documentação] - Revisão do `README.md`: Simplificação de descrições, adição dos fluxos de MFA, Recuperação de Senha e RBAC, e correção técnica do fluxo de registro (Worker-based hashing/insertion).
+- [2026-03-19] - [Infra] - Inicialização do repositório Git, configuração do remote origin (GitHub) e push da branch `main`.
 - [2026-03-19] - [Documentação] - Atualização do `README.md`: Inclusão de diagramas de fluxo (CQRS/MFA), tabela detalhada de rotas da API (REST) com níveis de acesso e especificações de infraestrutura.
 - [2026-03-19] - [Feature] - Autenticação Multifator (MFA/TOTP): Implementação completa do padrão RFC 6238 (totp) compatível com apps Authenticator (Google/Microsoft). Novas rotas `POST /mfa/setup` para geração de segredo/QR Code e `POST /mfa/verify` para validação do 2FA. Fluxo de Login estendido para suportar autenticação parcial via Redis, exigindo o segundo fator antes da emissão definitiva do JWT. Persistência adicionada via migração SQL (colunas `mfa_enabled` e `totp_secret`) e sincronização no modelo de leitura CQRS.
 - [2026-03-18] - [Testes] - Testes de Apresentação HTTP (AuthHandler): 7 cenários com `net/http/httptest` usando stubs de Use Cases. Cobertura: JSON malformado → 400, email inválido no Register → 400, registro bem-sucedido → 201, credenciais inválidas no Login → 401, token de logout ausente → 400, logout idempotente → 204. Sem nenhum framework de mock externo.
